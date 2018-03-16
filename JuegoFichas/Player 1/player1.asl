@@ -1,0 +1,345 @@
+
+/******************************************************
+******************** PLAYER GRUPO 2.1 *****************
+*******************************************************
+***************** IV罭 MART蚇EZ EST蒝EZ ***************
+***************** ISMAEL V罿QUEZ FERN罭DEZ ************
+***************** IV罭 DE DIOS FERN罭DEZ **************
+***************** IV罭 FERN罭DEZ S罭CHEZ **************
+*******************************************************/
+
+
+
+/* Initial beliefs and rules */
+player(0).
+vecesRecorrido(0).
+filaY(9).
+contiguas(X,X,Y1,Y2) :- math.abs(Y1-Y2) = 1.
+contiguas(X1,X2,Y,Y) :- math.abs(X1-X2) = 1.
+
+izquierda(X,Y,C,0) :- not steak(C,X,Y).
+izquierda(X,Y,C,N) :- steak(C,X,Y) & izquierda(X-1,Y,C,N1) & N = N1+1.
+
+derecha(X,Y,C,0) :- not steak(C,X,Y).
+derecha(X,Y,C,N) :- steak(C,X,Y) & derecha(X+1,Y,C,N1) & N = N1+1 & not C==4.
+
+arriba(X,Y,C,0) :- not steak(C,X,Y).
+arriba(X,Y,C,N) :- steak(C,X,Y) & arriba(X,Y-1,C,N1) & N = N1+1 & not C==4.
+
+abajo(X,Y,C,0) :- not steak(C,X,Y).
+abajo(X,Y,C,N) :- steak(C,X,Y) & abajo(X,Y+1,C,N1) & N = N1+1 & not C==4.
+
+fila(X,Y,C,T) :- steak(C1,X,Y) & izquierda(X-1,Y,C,N) & derecha(X+1,Y,C,M) & N+M >= T-1 & not C == C1 & not C1==4.
+columna(X,Y,C,T) :- steak(C1,X,Y) & arriba(X,Y-1,C,N) & abajo(X,Y+1,C,M) & N+M >= T-1 & not C == C1 & not C1==4.
+
+
+/* Initial goals */
+
+
+/* Plans */
+
++canExchange(N) : player(N) & sizeof(T)<- 
+			.print("Numero del player: ", N);
+			.wait(500);
+			-+filaY(T);
+			-+vecesRecorrido(0);
+			!buscarMovimientos.		
+
++tryAgain : sizeof(T) <- 
+			+myTurn; 
+			.abolish(tryAgain);
+			.wait(500);
+			-+filaY(T);
+			-+vecesRecorrido(0);
+			!buscarMovimientos.
+
+/*
+	AGRUPACION QUE AMPLIEN REGION
+*/
+//Agrupaci髇 5
+
+			
++!buscarMovimientos :filaY(Y) & columna(X,Y,C,5) & steak(C,X-1,Y) & player(N) & player(N+1,X,Y) 
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+
++!buscarMovimientos :filaY(Y) & columna(X,Y,C,5) & steak(C,X+1,Y) & player(N) & player(N+1,X,Y) 
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X+1,Y)). 
+
++!buscarMovimientos : filaY(Y) &fila(X,Y,C,5) & steak(C,X,Y-1) & player(N) & player(N+1,X,Y)
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y-1)). 
+
++!buscarMovimientos : filaY(Y) &fila(X,Y,C,5) & steak(C,X,Y+1) & player(N) & player(N+1,X,Y)
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y+1)). 
+
+//Agrupaci髇 T  con region
++!buscarMovimientos : filaY(Y) &steak(C,X,Y) & steak(C,X-1,Y+1) & steak(C1,X,Y+1) 
+						& steak(C,X+1,Y+1) & steak(C,X,Y+2) & steak(C,X,Y+3) 
+						& player(N) & player(N+1,X,Y) & not C == C1
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y)). 
+	
++!buscarMovimientos : filaY(Y) &steak(C,X,Y) & steak(C,X-1,Y-1) & steak(C1,X,Y-1) 
+						& steak(C,X+1,Y-1) & steak(C,X,Y-2) & steak(C,X,Y-3)
+						& player(N) & player(N+1,X,Y) & not C == C1
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y)).
+	
++!buscarMovimientos : filaY(Y) &steak(C,X,Y) & steak(C,X+1,Y-1) & steak(C1,X+1,Y) 
+						& steak(C,X+2,Y) & steak(C,X+3,Y) & steak(C,X+1,Y+1) 
+						& player(N) & player(N+1,X,Y)& not C == C1
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+
+	<- !intercambiar(der,steak(C,X,Y)).  
+	
++!buscarMovimientos : filaY(Y) &steak(C,X,Y) & steak(C,X-1,Y-1) & steak(C1,X-1,Y) 
+					& steak(C,X-2,Y) & steak(C,X-3,Y) & steak(C,X-1,Y+1) 
+					& player(N) & player(N+1,X,Y) & not C == C1
+					& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X,Y)).
+	
+//Agrupaci髇 Cuadrado  con region
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C1,X+1,Y) & steak(C,X+2,Y) 
+						& steak(C,X+1,Y+1) & steak(C,X+2,Y+1)& player(N)
+						& player(N+1,X,Y) & not C == C1
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X,Y)). 
+	
++!buscarMovimientos : filaY(Y) &steak(C,X,Y) & steak(C1,X+1,Y) & steak(C,X+2,Y) 
+					& steak(C,X+1,Y-1) & steak(C,X+2,Y-1)& player(N) 
+					& player(N+1,X,Y) & not C == C1
+					& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X,Y)). 
+	
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C1,X-1,Y) & steak(C,X-2,Y) 
+					& steak(C,X-1,Y+1) & steak(C,X-2,Y+1)& player(N) 
+					& player(N+1,X,Y) & not C == C1
+					& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X,Y)). 
+	
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C1,X-1,Y) & steak(C,X-2,Y) 
+						& steak(C,X-1,Y-1) & steak(C,X-2,Y-1)& player(N) 
+						& player(N+1,X,Y) & not C == C1
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X,Y)).
+	
+//Agrupaci髇 4  con region
++!buscarMovimientos :filaY(Y) & fila(X,Y,C,4) & steak(C,X,Y+1)& player(N) 
+						& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y+1)).
+
++!buscarMovimientos :filaY(Y) & fila(X,Y,C,4) & steak(C,X,Y-1)& player(N) 
+						& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y-1)). 
+	
++!buscarMovimientos :filaY(Y) &columna(X,Y,C,4) & steak(C,X+1,Y)& player(N) 
+						& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X+1,Y)). 
+	
++!buscarMovimientos :filaY(Y) & columna(X,Y,C,4) & steak(C,X-1,Y)& player(N) 
+						& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+
+
+//Agrupaci髇  3 con region
++!buscarMovimientos : filaY(Y) &  fila(X,Y,C,3) & steak(C,X,Y-1)& player(N) 
+							& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4 & not C ==4 
+	<- !intercambiar(bajar,steak(C,X,Y-1)). 
+	
++!buscarMovimientos :filaY(Y) &fila(X,Y,C,3) & steak(C,X,Y+1)& player(N) 
+							& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y+1)). 
+	
++!buscarMovimientos :filaY(Y) & columna(X,Y,C,3) & steak(C,X+1,Y)& player(N) 
+							& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X+1,Y)). 
+	
++!buscarMovimientos : filaY(Y) &columna(X,Y,C,3) & steak(C,X-1,Y)& player(N) 
+							& player(N+1,X,Y) & steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+
+
+/*
+	AGRUPACION SIN REGION
+*/
+
+//Agrupaci髇  5
++!buscarMovimientos :filaY(Y) & fila(X,Y,C,5) & steak(C,X,Y-1)& steak(C1,X,Y) 
+						& not C1 == 4  & not C ==4
+	<-!intercambiar(bajar,steak(C,X,Y-1)). 
+	
++!buscarMovimientos : filaY(Y) &fila(X,Y,C,5) & steak(C,X,Y+1)& steak(C1,X,Y) 
+						& not C1 == 4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y+1)). 
+	
++!buscarMovimientos : filaY(Y) & columna(X,Y,C,5) & steak(C,X+1,Y) & steak(C1,X,Y) 
+						& not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X+1,Y)). 
+	
++!buscarMovimientos :filaY(Y) &columna(X,Y,C,5) & steak(C,X-1,Y) & steak(C1,X,Y) 
+						& not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+
+//Agrupaci髇 T
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C,X-1,Y+1) & steak(C1,X,Y+1) 
+					& steak(C,X+1,Y+1) & steak(C,X,Y+2) & steak(C,X,Y+3) & not C == C1
+					& not C1 == 4  & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y)).
+	
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C,X-1,Y-1) & steak(C1,X,Y-1) 
+					& steak(C,X+1,Y-1) & steak(C,X,Y-2) & steak(C,X,Y-3) & not C == C1
+					& not C1 == 4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y)). 
+	
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C,X+1,Y-1) & steak(C1,X+1,Y) 
+					& steak(C,X+2,Y) & steak(C,X+3,Y) & steak(C,X+1,Y+1) & not C == C1
+					& not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X,Y)).  
+	
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C,X-1,Y-1) & steak(C1,X-1,Y) 
+					& steak(C,X-2,Y) & steak(C,X-3,Y) & steak(C,X-1,Y+1) & not C == C1
+					& not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X,Y)). 
+
+//Agrupaci髇 Cuadrado
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C1,X+1,Y) & steak(C,X+2,Y) 
+						& steak(C,X+1,Y+1) & steak(C,X+2,Y+1) & not C == C1
+						& not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X,Y)).
+	
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C1,X+1,Y) & steak(C,X+2,Y) 
+						& steak(C,X+1,Y-1) & steak(C,X+2,Y-1) & not C == C1
+						& not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X,Y)). 
+	
++!buscarMovimientos :filaY(Y) & steak(C,X,Y) & steak(C1,X-1,Y) & steak(C,X-2,Y) 
+						& steak(C,X-1,Y+1) & steak(C,X-2,Y+1) & not C == C1
+						& not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X,Y)).
+	
++!buscarMovimientos :filaY(Y) &  steak(C,X,Y) & steak(C1,X-1,Y) & steak(C,X-2,Y) 
+						& steak(C,X-1,Y-1) & steak(C,X-2,Y-1) & not C == C1
+						& not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X,Y)).
+	
+//Agrupaci髇 4
++!buscarMovimientos :filaY(Y) &  fila(X,Y,C,4) & steak(C,X,Y-1)
+					& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y-1)). 
+	
++!buscarMovimientos :filaY(Y) & fila(X,Y,C,4) & steak(C,X,Y+1)
+					& steak(C1,X,Y) & not C1 == 4 & not C ==4 
+	<- !intercambiar(subir,steak(C,X,Y+1)). 
+	
++!buscarMovimientos :filaY(Y) & columna(X,Y,C,4) & steak(C,X+1,Y) 
+					& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(izq,steak(C,X+1,Y)). 
+	
++!buscarMovimientos :filaY(Y) &  columna(X,Y,C,4) & steak(C,X-1,Y)
+					& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+
+
+//Agrupaci髇  3
++!buscarMovimientos :filaY(Y) &  fila(X,Y,C,3) & steak(C,X,Y-1) 
+							& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y-1)). 
+	
++!buscarMovimientos :filaY(Y) &  fila(X,Y,C,3) & steak(C,X,Y+1) 
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y+1)). 
+	
++!buscarMovimientos :filaY(Y) &  columna(X,Y,C,3) & steak(C,X+1,Y) 
+						& steak(C1,X,Y) & not C1 == 4 
+	<- !intercambiar(izq,steak(C,X+1,Y)). 
+	
++!buscarMovimientos :filaY(Y) &  columna(X,Y,C,3) & steak(C,X-1,Y) 
+						& steak(C1,X,Y) & not C1 == 4  & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+
+
++!buscarMovimientos :filaY(Y) & Y > 0 <-
+	-+filaY(Y-1);
+	!buscarMovimientos.
+	
++!buscarMovimientos :filaY(Y) & Y == 0 <-
+	-+filaY(9);
+	!moverBasica.
+	
+	
+//B醩icos con region
++!moverBasica :filaY(Y) & steak(C1,X,Y) & steak(C,X,Y-1) & player(N) 
+				& player(N+1,X,Y) & not C == C1 & not C1 ==4 & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y-1)).
++!moverBasica :filaY(Y) &  steak(C1,X,Y) & steak(C,X,Y+1) & player(N) 
+				& player(N+1,X,Y) & not C == C1 & not C1 ==4  & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y+1)).
++!moverBasica :filaY(Y) & steak(C1,X,Y) & steak(C,X+1,Y) & player(N) 
+				& player(N+1,X,Y)& not C == C1 & not C1 ==4  & not C ==4
+	<- !intercambiar(izq,steak(C,X+1,Y)).
++!moverBasica :filaY(Y) & steak(C1,X,Y) & steak(C,X-1,Y) & player(N) 
+				& player(N+1,X,Y) & not C == C1 & not C1 ==4 & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+
+//Basicos sin region
++!moverBasica :filaY(Y) & steak(C1,X,Y) & steak(C,X,Y-1) & not C == C1 & not C1 ==4 & not C ==4
+	<- !intercambiar(bajar,steak(C,X,Y-1)).
++!moverBasica :filaY(Y) &  steak(C1,X,Y) & steak(C,X,Y+1) & not C == C1 & not C1 ==4 & not C ==4
+	<- !intercambiar(subir,steak(C,X,Y+1)).
++!moverBasica :filaY(Y) & steak(C1,X,Y) & steak(C,X+1,Y) & not C == C1 & not C1 ==4 & not C ==4
+	<- !intercambiar(izq,steak(C,X+1,Y)).
++!moverBasica :filaY(Y) &  steak(C1,X,Y) & steak(C,X-1,Y) & not C == C1 & not C1 ==4 & not C ==4
+	<- !intercambiar(der,steak(C,X-1,Y)).
+	
++!moverBasica :filaY(Y) & Y > 0 <-
+	-+filaY(Y-1);
+	!moverBasica.
+	
++!moverBasica :filaY(Y) & Y == 0 & vecesRecorrido(V) & V==0<-
+	-+filaY(9);
+	-+vecesRecorrido(V+1);
+	!moverBasica.
+	
++!moverBasica: filaY(Y) & Y == 0 & vecesRecorrido(V) & V > 0 <-
+	.print("no hay movimiento posible");
+	-myTurn;
+.
+
+	
+//	INTERCAMBIAR
+
++!intercambiar(Direccion,steak(C,X,Y)) <-
+	
+	if (Direccion == izq) {
+		.print("Pedir intercambio: (",X,", ",Y,") ","-> (",X-1,",",Y,")");
+		.send(judge,tell,exchange(X,Y,X-1,Y));
+	}
+	if (Direccion == der) {
+		.print("Pedir intercambio: (",X,", ",Y,") ","-> (",X+1,",",Y,")");
+		.send(judge,tell,exchange(X,Y,X+1,Y));
+	}
+	if (Direccion == subir) {
+		.print("Pedir intercambio: (",X,", ",Y,") ","-> (",X,",",Y-1,")");
+		.send(judge,tell,exchange(X,Y,X,Y-1));
+	}
+	if (Direccion == bajar) {
+		.print("Pedir intercambio: (",X,", ",Y,") ","-> (",X,",",Y+1,")");
+		.send(judge,tell,exchange(X,Y,X,Y+1));
+	}
+	.wait(500).
+
+/*****************************************************************/	
+
+
+
++pos(Ag,X,Y)[source(S)] <- -pos(Ag,X,Y)[source(S)].
+
++ip(X,Y,C) <- .print("Hay un investigador principal en la posici贸n: ", X, ",", Y, " de color:", C).
++ct(X,Y,C) <- .print("Hay un catedratico en la posici贸n: ", X, ",", Y, " de color:", C).
++gs(X,Y,C) <- .print("Hay un gestor en la posici贸n: ", X, ",", Y, " de color:", C).
++co(X,Y,C) <- .print("Hay un comprador en la posici贸n: ", X, ",", Y, " de color:", C).
+
+
